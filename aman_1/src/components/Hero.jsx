@@ -135,7 +135,7 @@ const HeroSection = () => {
             onMouseLeave={handleMouseLeave}
           >
             <motion.img
-              src="public/ChatGPT Image Oct 28, 2025, 12_05_06 PM.png"
+              src="https://github.com/Aman-kumar-178/My-Portfolio/blob/main/aman_1/public/ChatGPT%20Image%20Oct%2028%2C%202025%2C%2012_05_06%20PM.png"
               alt="3D Businessman Working"
               className="w-72 sm:w-80 md:w-96 lg:w-[30rem] h-auto rounded-2xl object-contain drop-shadow-[0_0_30px_rgba(255,120,150,0.4)]"
               animate={{
