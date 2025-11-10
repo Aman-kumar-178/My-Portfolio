@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import developerImg from '../assets/developer.png';
 
 const HeroSection = () => {
   const shimmerCss = `
@@ -135,9 +136,9 @@ const HeroSection = () => {
             onMouseLeave={handleMouseLeave}
           >
             <motion.img
-              src="/ChatGPT Image Oct 28, 2025, 12_05_06 PM.png"
+              src={developerImg} // <- use imported image variable
               alt="3D Businessman Working"
-              className="w-72 sm:w-80 md:w-96 lg:w-[30rem] h-auto rounded-2xl object-contain drop-shadow-[0_0_30px_rgba(255,120,150,0.4)]"
+              className="w-72 sm:w-80 md:w-96 lg:w-[30rem] h-auto rounded-2xl object-contain relative z-50 drop-shadow-[0_0_30px_rgba(255,120,150,0.4)]"
               animate={{
                 y: [0, -15, 0],
                 rotateY: [0, 8, -8, 0],
