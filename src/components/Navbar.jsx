@@ -1,286 +1,214 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Linkedin } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useMotionValueEvent,
+} from "framer-motion";
+import { Menu, X, Github, Linkedin, ArrowRight, Sparkles } from "lucide-react";
 
 const sections = [
-  "Home",
-  "About",
-  "Experience",
-  "Skills",
-  "Projects",
-  "Achievements",
-  "Contact",
+  { name: "Home", id: "home" },
+  { name: "About", id: "about" },
+  { name: "Experience", id: "experience" },
+  { name: "Skills", id: "skills" },
+  { name: "Projects", id: "projects" },
+  { name: "Achievements", id: "achievements" },
+  { name: "Contact", id: "contact" },
 ];
 
-function NavLink({ label, active, onClick }) {
-  const ref = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, scale: 1 });
-
-  const handleMove = (e) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rx = -((y - rect.height / 2) / rect.height) * 8;
-    const ry = ((x - rect.width / 2) / rect.width) * 8;
-    setTilt({ rx, ry, scale: 1.04 });
-  };
-
-  const reset = () => setTilt({ rx: 0, ry: 0, scale: 1 });
-
-  return (
-    <motion.button
-      ref={ref}
-      onMouseMove={handleMove}
-      onMouseLeave={reset}
-      onFocus={reset}
-      onClick={onClick}
-      className="relative px-3 py-2 focus:outline-none"
-      style={{
-        transform: `perspective(600px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.scale})`,
-        transition: "transform 0.12s linear",
-      }}
-      aria-current={active ? "page" : undefined}
-    >
-      <span
-        className={`font-medium transition-colors duration-150 ${
-          active ? "text-white" : "text-gray-300 hover:text-white"
-        }`}
-      >
-        {label}
-      </span>
-
-      {/* Underline Animation */}
-      <motion.span
-        layout
-        initial={{ width: 0 }}
-        animate={{ width: active ? "100%" : 0 }}
-        transition={{ type: "tween", duration: 0.25 }}
-        className="block h-[2px] bg-cyan-400 rounded mt-1"
-        style={{ transformOrigin: "left" }}
-      />
-    </motion.button>
-  );
-}
-
-function SocialIcon({ href, Icon, glowColor = "rgba(6,182,212,0.25)", label }) {
-  const ref = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
-  const [hovered, setHovered] = useState(false);
-
-  const handleMove = (e) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rx = -((y - rect.height / 2) / rect.height) * 10;
-    const ry = ((x - rect.width / 2) / rect.width) * 10;
-    setTilt({ rx, ry, sx: 1.06 });
-  };
-
-  const reset = () => setTilt({ rx: 0, ry: 0, sx: 1 });
-
-  return (
-    <motion.a
-      ref={ref}
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      onMouseMove={handleMove}
-      onMouseLeave={() => {
-        reset();
-        setHovered(false);
-      }}
-      onMouseEnter={() => setHovered(true)}
-      className="relative inline-flex items-center justify-center w-10 h-10 rounded-md"
-      style={{
-        transformStyle: "preserve-3d",
-        willChange: "transform, box-shadow",
-      }}
-      animate={{
-        rotateX: tilt.rx,
-        rotateY: tilt.ry,
-        scale: tilt.sx,
-      }}
-      transition={{ type: "spring", stiffness: 220, damping: 18 }}
-    >
-      <motion.span
-        className="absolute inset-0 rounded-md pointer-events-none"
-        style={{
-          boxShadow: hovered
-            ? `0 10px 30px ${glowColor}, inset 0 0 20px ${glowColor}`
-            : "0 0 0 rgba(0,0,0,0)",
-          transition: "box-shadow 0.18s ease",
-        }}
-      />
-      <motion.span
-        className="relative z-10 text-gray-300"
-        animate={hovered ? { y: [-2, 0, -2] } : { y: 0 }}
-        transition={{
-          repeat: hovered ? Infinity : 0,
-          duration: 1.6,
-          ease: "easeInOut",
-        }}
-      >
-        <Icon className="w-5 h-5" />
-      </motion.span>
-    </motion.a>
-  );
-}
-
-export default function DarkNavbar() {
+export default function ProfessionalNavbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [active, setActive] = useState("Home");
-  const [manualClick, setManualClick] = useState(false);
+  const [active, setActive] = useState("home");
+  const [scrolled, setScrolled] = useState(false);
 
-  // Scroll-based section detection
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setScrolled(latest > 60);
+  });
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (manualClick) return; // Skip while user clicked manually
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
-      let current = "Home";
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+    );
 
-      for (const sec of sections) {
-        const el = document.getElementById(sec.toLowerCase());
-        if (el && el.offsetTop <= scrollPosition - 50) {
-          current = sec;
-        }
-      }
+    sections.forEach((sec) => {
+      const el = document.getElementById(sec.id);
+      if (el) observer.observe(el);
+    });
 
-      setActive(current);
-    };
+    return () => observer.disconnect();
+  }, []);
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [manualClick]);
-
-  // Smooth scroll + click active
-  const scrollTo = (label) => {
-    const el = document.getElementById(label.toLowerCase());
+  const scrollToSection = (targetId) => {
+    const el = document.getElementById(targetId);
     if (el) {
-      setManualClick(true);
-      setActive(label);
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(() => setManualClick(false), 1000); // re-enable scroll detection
+      const offset = 90;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
     }
     setIsMobileOpen(false);
   };
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full bg-black/95 backdrop-blur-sm border-b border-gray-900 shadow-lg z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-16">
-          <div
-            className="font-bold text-2xl sm:text-3xl text-white cursor-pointer select-none"
-            onClick={() => scrollTo("Home")}
+      <nav
+        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
+          scrolled
+            ? "py-3 bg-zinc-950/60 backdrop-blur-2xl border-b border-violet-500/20 shadow-[0_10px_30px_-10px_rgba(139,92,246,0.3)]"
+            : "py-6 bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          
+          <motion.div
+            onClick={() => scrollToSection("home")}
+            className="flex items-center gap-3 cursor-pointer group"
           >
-            Portfolio
-          </div>
-
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-2">
-            {sections.map((sec) => (
-              <NavLink
-                key={sec}
-                label={sec}
-                active={active === sec}
-                onClick={() => scrollTo(sec)}
-              />
-            ))}
-            <div className="ml-4 flex items-center gap-2">
-              <SocialIcon
-                href="https://github.com/Aman-kumar-178"
-                Icon={Github}
-                glowColor="rgba(255,255,255,0.08)"
-                label="GitHub"
-              />
-              <SocialIcon
-                href="https://www.linkedin.com/in/aman-kumar-a72131338"
-                Icon={Linkedin}
-                glowColor="rgba(10,130,200,0.12)"
-                label="LinkedIn"
-              />
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-500 to-fuchsia-600 rounded-xl blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
+              <div className="relative w-11 h-11 bg-black rounded-xl flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-tr from-violet-400 to-fuchsia-500 text-2xl border border-white/10">
+                A
+              </div>
             </div>
+            <span className="text-white font-bold text-xl tracking-tighter">
+              AMAN<span className="text-violet-500 animate-pulse">.</span>
+            </span>
+          </motion.div>
+
+          <div className="hidden lg:flex items-center bg-zinc-900/50 border border-white/10 px-2 py-1.5 rounded-full backdrop-blur-md shadow-inner">
+            {sections.map((sec) => (
+              <button
+                key={sec.id}
+                onClick={() => scrollToSection(sec.id)}
+                className={`relative px-5 py-2 text-sm font-bold transition-all duration-300 ${
+                  active === sec.id 
+                  ? "text-violet-400" 
+                  : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                <span className="relative z-10">{sec.name}</span>
+                {active === sec.id && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-full border border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                    transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
+                  />
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* Mobile toggle */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMobileOpen((s) => !s)}
-              aria-label="Toggle menu"
-              className="text-gray-300 p-2 rounded hover:bg-white/5"
+          <div className="hidden lg:flex items-center gap-6">
+            <div className="flex gap-4 border-r border-white/10 pr-6">
+              <SocialLink href="https://github.com/Aman-kumar-178" Icon={Github} color="hover:text-white" />
+              <SocialLink href="https://linkedin.com/in/aman-kumar-a72131338" Icon={Linkedin} color="hover:text-violet-500" />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px rgba(139, 92, 246, 0.4)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => scrollToSection("contact")}
+              className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white px-7 py-3 rounded-full text-sm font-black flex items-center gap-2 shadow-lg transition-all"
             >
-              {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+              LET'S TALK <ArrowRight size={16} />
+            </motion.button>
           </div>
+
+          <button
+            onClick={() => setIsMobileOpen(true)}
+            className="lg:hidden p-3 text-violet-400 bg-violet-500/10 rounded-xl border border-violet-500/20 hover:bg-violet-500/20 transition-all"
+          >
+            <Menu size={24} />
+          </button>
         </div>
       </nav>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {isMobileOpen && (
           <>
-            <motion.aside
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileOpen(false)}
+              className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[150]"
+            />
+            <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-72 bg-black shadow-2xl z-50 p-6 md:hidden"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-[280px] sm:w-[350px] bg-[#09090b] z-[200] border-l border-violet-500/20 flex flex-col shadow-2xl"
             >
-              <div className="flex flex-col gap-6 mt-4">
-                {sections.map((sec) => (
-                  <button
-                    key={sec}
-                    onClick={() => scrollTo(sec)}
-                    className={`text-left text-lg px-2 py-2 rounded transition-colors ${
-                      active === sec
-                        ? "text-white font-semibold"
-                        : "text-gray-300 hover:text-white"
+              <div className="p-6 flex items-center justify-between border-b border-white/5 bg-zinc-950/50">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="text-violet-400" size={16} />
+                  <span className="text-zinc-100 font-bold tracking-widest uppercase text-xs">Navigation</span>
+                </div>
+                <button onClick={() => setIsMobileOpen(false)} className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Sidebar Content - SCROLLBAR HIDDEN FIX */}
+              <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2 
+                [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {sections.map((sec, i) => (
+                  <motion.button
+                    key={sec.id}
+                    onClick={() => scrollToSection(sec.id)}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-300 group ${
+                      active === sec.id
+                        ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
                     }`}
                   >
-                    {sec}
-                  </button>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-mono opacity-50">0{i + 1}</span>
+                      <span className="font-bold text-base uppercase tracking-tight">{sec.name}</span>
+                    </div>
+                    <ArrowRight size={18} className={`transition-transform group-hover:translate-x-1 ${active === sec.id ? "block" : "hidden"}`} />
+                  </motion.button>
                 ))}
-
-                <div className="mt-4 border-t border-gray-800 pt-4 flex flex-col gap-3">
-                  <a
-                    href="https://github.com/Aman-kumar-178"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-300 hover:text-white"
-                  >
-                    <Github className="w-5 h-5" /> <span>GitHub</span>
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/aman-kumar-a72131338"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-gray-300 hover:text-white"
-                  >
-                    <Linkedin className="w-5 h-5" /> <span>LinkedIn</span>
-                  </a>
-                </div>
               </div>
-            </motion.aside>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.45 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="fixed inset-0 bg-black z-40 md:hidden"
-              onClick={() => setIsMobileOpen(false)}
-            />
+              <div className="p-6 border-t border-white/5 bg-zinc-950/50">
+                 <div className="flex gap-5 mb-4">
+                    <SocialLink href="https://github.com/Aman-kumar-178" Icon={Github} color="text-zinc-400 hover:text-white" />
+                    <SocialLink href="https://linkedin.com/in/aman-kumar-a72131338" Icon={Linkedin} color="text-zinc-400 hover:text-violet-500" />
+                 </div>
+                 <p className="text-zinc-600 text-[10px] font-medium tracking-widest uppercase">© 2025 AMAN KUMAR</p>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function SocialLink({ href, Icon, color }) {
+  return (
+    <motion.a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      whileHover={{ y: -3, scale: 1.1 }}
+      className={`${color} transition-all duration-300`}
+    >
+      <Icon size={22} />
+    </motion.a>
   );
 }

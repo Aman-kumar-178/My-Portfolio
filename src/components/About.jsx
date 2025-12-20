@@ -1,133 +1,123 @@
 'use client';
 
 import React from "react";
-import WorkExperience from "./Work";
-import Skills from "./Skill";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
-const DotIcon = () => (
-  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="4" cy="4" r="4" fill="currentColor" />
-  </svg>
-);
+const ProfessionalAbout = () => {
+  // Smooth Parallax for the entire section
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseX = useSpring(x, { stiffness: 150, damping: 25 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 25 });
 
-const coderData = {
-  name: 'Aman Kumar',
-  role: 'Full Stack Developer',
-  location: 'India'
-};
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    x.set((clientX - window.innerWidth / 2) / 30);
+    y.set((clientY - window.innerHeight / 2) / 30);
+  };
 
-// 🔹 Simple One-Color Heading
-const PageHeader = () => (
-  <div className="text-center mb-8 px-4 sm:px-0">
-    <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-400">
-      About Me
-    </h1>
-    <div className="w-20 h-[3px] bg-blue-500 mx-auto mt-2 rounded-full" />
-  </div>
-);
-
-// 🔹 Compact About Section
-const AboutSection = () => (
-  <div className="bg-[#0d0d0d] border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-blue-900/30 transition-transform hover:scale-[1.02]">
-    <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
-      <div className="p-3 bg-white/10 rounded-md flex-shrink-0">
-        <DotIcon />
-      </div>
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">Hi, I’m {coderData.name}</h2>
-        <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-          I am a passionate <span className="text-white font-semibold">{coderData.role}</span> from {coderData.location}.  
-          I enjoy building interactive and efficient web experiences that deliver value.
-        </p>
-        <p className="mt-2 text-gray-400 text-sm sm:text-base leading-relaxed">
-          My focus is on crafting applications that are fast, scalable, and user-friendly using modern web and cloud technologies.
-        </p>
-      </div>
-    </div>
-  </div>
-);
-
-// 🔹 Compact Code Section
-const CodeSection = () => (
-  <div className="relative">
-    <div className="absolute inset-0 rounded-2xl animate-border pointer-events-none" />
-    <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-md transform-style preserve-3d" style={{ perspective: '900px' }}>
-      <div className="code-card-3d">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          </div>
-          <div className="text-xs text-gray-500">about.js</div>
-        </div>
-
-        <pre className="whitespace-pre-wrap leading-relaxed overflow-x-auto text-gray-300 font-mono text-xs sm:text-sm md:text-base">
-{`// snapshot of my developer profile
-const aboutMe = {
-  name: '${coderData.name}',
-  role: '${coderData.role}',
-  location: '${coderData.location}',
-  motto: 'Build, Learn, Repeat',
-  focus: ['Responsive UIs', 'Clean Code', 'Scalable Architecture']
-};
-
-export default aboutMe;`}
-        </pre>
-      </div>
-    </div>
-
-    <style>{`
-      .animate-border {
-        background: conic-gradient(from 0deg, #2563eb, #06b6d4, #3b82f6, #2563eb);
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        padding: 1.5px;
-        filter: blur(5px);
-        animation: rotateBorder 6s linear infinite;
-      }
-
-      @keyframes rotateBorder {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      .code-card-3d {
-        transform: rotateX(6deg) rotateY(-4deg);
-        transition: transform 0.5s ease;
-      }
-
-      .code-card-3d:hover {
-        transform: rotateX(0deg) rotateY(0deg) scale(1.02);
-      }
-
-      pre::-webkit-scrollbar { height: 5px; }
-      pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
-    `}</style>
-  </div>
-);
-
-const Portfolio = () => {
   return (
-    <section id="about">
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-black text-white font-sans p-6 sm:p-12">
-        <PageHeader />
+    <section 
+      onMouseMove={handleMouseMove}
+      className="relative min-h-screen w-full flex items-center justify-center bg-[#010101] overflow-hidden py-24 px-8"
+    >
+      {/* --- PREMIUM DYNAMIC BACKGROUND (GRID REMOVED) --- */}
+      <motion.div style={{ x: mouseX, y: mouseY }} className="absolute inset-0 z-0">
+        {/* Dynamic Glow Orbs */}
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-blue-600/10 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/10 blur-[150px] rounded-full" />
+        
+        {/* Floating Data Streams / Texture */}
+        <motion.div 
+          animate={{ y: [-20, 20], opacity: [0.1, 0.3, 0.1] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"
+        />
+      </motion.div>
 
-        {/* Compact Grid */}
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16">
-          <AboutSection />
-          <CodeSection />
-        </div>
+      <div className="relative z-10 max-w-7xl w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          
+          {/* --- LEFT: EXPANDED BIO (7 UNITS) --- */}
+          <motion.div 
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+            className="lg:col-span-7 space-y-10"
+          >
+            <div className="space-y-4">
+              <span className="text-blue-500 font-mono text-sm tracking-[0.5em] uppercase">Executive Profile</span>
+              <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-none">
+                Aman <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">Kumar</span>
+              </h1>
+              <div className="h-[1px] w-24 bg-gradient-to-r from-blue-500 to-transparent" />
+            </div>
 
-        {/* Work Experience and Skills */}
-        <div className="w-full max-w-6xl mt-16 sm:mt-24">
-          <WorkExperience />
-          <Skills />
+            <div className="space-y-8 max-w-2xl text-zinc-300">
+              <p className="text-2xl md:text-3xl font-light leading-snug">
+                I am a <span className="text-white font-medium">Computer Science Engineer</span> from Prayagraj, specializing in architecting modern <span className="text-blue-400">Full-Stack Ecosystems</span> and <span className="text-indigo-400">AI-driven solutions</span>.
+              </p>
+              
+              <p className="text-lg leading-relaxed font-light text-zinc-400">
+                With a robust foundation from SHUATS, my technical journey is driven by the challenge of transforming complex data into seamless user experiences. I thrive on the synergy between frontend aesthetics and backend scalability, having delivered high-performance applications from e-commerce platforms to real-time food delivery systems.
+              </p>
+
+              <p className="text-lg leading-relaxed font-light text-zinc-400">
+                Beyond traditional development, I am deeply invested in Machine Learning, where I engineer predictive models with proven accuracies—such as my **84.6% accuracy** classification for water quality and 78.4% for EV demand forecasting. I am committed to pushing the boundaries of what's possible with code.
+              </p>
+            </div>
+
+            {/* Resume Fast-Facts */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
+              {[
+                { label: "Location", val: "UP, India" },
+                { label: "Internship", val: "AI/ML @ Edunet" },
+                { label: "Certified", val: "Oracle Cloud" }
+              ].map((info, i) => (
+                <div key={i} className="group">
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-blue-500 transition-colors">{info.label}</p>
+                  <p className="text-white font-semibold group-hover:translate-x-1 transition-transform">{info.val}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* --- RIGHT: INTERACTIVE EXPERTISE CARDS (5 UNITS) --- */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* Card 1: Web Tech */}
+            <motion.div 
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="p-8 bg-zinc-900/30 border border-white/10 rounded-[2.5rem] backdrop-blur-3xl group"
+            >
+              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 text-blue-500 border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6" /></svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Full Stack Architecture</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Expertise in the MERN stack, Next.js, and TypeScript. Focusing on secure authentication, RESTful APIs, and cloud-ready deployments.
+              </p>
+            </motion.div>
+
+            {/* Card 2: AI/ML */}
+            <motion.div 
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="p-8 bg-zinc-900/30 border border-white/10 rounded-[2.5rem] backdrop-blur-3xl group"
+            >
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 text-indigo-400 border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 12h20" /></svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Predictive Intelligence</h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Developing advanced ML models using Python and Scikit-learn. Specializing in regression, clustering, and data-driven decision making.
+              </p>
+            </motion.div>
+
+          </div>
         </div>
       </div>
     </section>
   );
 };
 
-export default Portfolio;
+export default ProfessionalAbout;

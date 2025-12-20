@@ -1,112 +1,155 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
+'use client';
+import React, { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
-const workItems = [
-  {
-    role: "Full Stack Web Development Intern",
-    company: "Vedsar Pvt. Ltd.",
-    period: "Jan 2024 - Mar 2024",
-    description: [
-      "Developed responsive websites using HTML, CSS, JavaScript, and React.",
-      "Fixed UI bugs and improved performance metrics.",
-      "Built secure backend with Node.js and Express.",
-      "Used Git & GitHub for version control.",
-    ],
-  },
-  {
-    role: "AI/ML Intern",
-    company: "Edunet Foundation | Remote",
-    period: "Apr 2024 - Jun 2024",
-    description: [
-      "Worked on Machine Learning projects involving Regression and Classification.",
-      "Used Python, Pandas, NumPy, and Scikit-learn for data preprocessing and modeling.",
-      "Implemented models and optimized accuracy using evaluation metrics.",
-    ],
-  },
-  {
-    role: "AI/ML Intern",
-    company: "Infosys Springboard Program | Online",
-    period: "Sep 2023 - Nov 2023",
-    description: [
-      "Created an Audio Book Generator using Python and Streamlit.",
-      "Integrated TTS models for converting text to speech.",
-      "Optimized the project for multilingual support and deployment.",
-    ],
-  },
-];
+const ExperienceCard = ({ item, index }) => {
+  const cardRef = useRef(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
-const TimelineCard = ({ item, index }) => {
-  const isLeft = index % 2 === 0;
+  // Smooth handle for mouse movement
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const { left, top } = cardRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - left, y: e.clientY - top });
+  };
+
+  const { scrollYProgress } = useScroll({ 
+    target: cardRef, 
+    offset: ["start end", "end start"] 
+  });
+
+  // Scroll animations
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [0.95, 1]);
+
+  // Design Config
+  const gradients = [
+    "from-slate-800 via-slate-900 to-black group-hover:from-blue-900/40",
+    "from-teal-900 via-emerald-950 to-black group-hover:from-emerald-900/40",
+    "from-indigo-950 via-slate-950 to-black group-hover:from-indigo-900/40",
+  ];
+
+  const accents = [
+    "border-blue-500/20 group-hover:border-blue-400/50", 
+    "border-emerald-500/20 group-hover:border-emerald-400/50", 
+    "border-indigo-500/20 group-hover:border-indigo-400/50"
+  ];
+  
+  const textAccents = ["text-blue-400", "text-emerald-400", "text-indigo-400"];
+
   return (
-    <div
-      className={`relative flex ${
-        isLeft ? "justify-start" : "justify-end"
-      } w-full`}
+    <motion.div 
+      ref={cardRef}
+      style={{ opacity, scale }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className="flex flex-col md:flex-row gap-6 mb-16 w-full group relative cursor-none md:cursor-default"
     >
-      {/* Connector Dot */}
-      <div
-        className={`absolute top-10 ${
-          isLeft ? "left-[49.6%]" : "right-[49.6%]"
-        } w-4 h-4 bg-blue-500 rounded-full z-20 border-4 border-black`}
-      ></div>
+      {/* LEFT SIDE: Title Card */}
+      <div className={`relative w-full md:w-[35%] min-h-[240px] rounded-3xl p-8 flex flex-col justify-between overflow-hidden border transition-all duration-500 ${accents[index % accents.length]} bg-gradient-to-br ${gradients[index % gradients.length]} shadow-2xl`}>
+        
+        {/* Spotlight Effect - Optimized to prevent errors */}
+        <div 
+          className="pointer-events-none absolute -inset-px transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.1), transparent 40%)`,
+          }}
+        />
 
-      {/* Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-        className={`relative bg-[#111] text-gray-300 shadow-md hover:shadow-blue-900/40 transition-all duration-300 rounded-2xl p-6 w-[85%] md:w-[45%] border border-gray-800 ${
-          isLeft ? "ml-0 mr-auto" : "ml-auto mr-0"
-        }`}
-      >
-        <h3 className="text-xl font-semibold text-white mb-1">{item.role}</h3>
-        <p className="text-gray-400 text-sm mb-3">
-          {item.company} | {item.period}
+        <div className="z-10 transition-transform duration-500 group-hover:translate-x-1">
+          <p className="text-white/30 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">{item.period}</p>
+          <h3 className="text-white text-3xl font-bold leading-tight tracking-tight group-hover:text-white/90">
+            {item.role}
+          </h3>
+        </div>
+        
+        <div className="z-10">
+          <p className={`${textAccents[index % textAccents.length]} text-lg font-medium tracking-wide flex items-center gap-2`}>
+            <span className="h-[1px] w-4 bg-current"></span>
+            {item.company}
+          </p>
+        </div>
+      </div>
+
+      {/* RIGHT SIDE: Description Card */}
+      <div className="w-full md:w-[65%] rounded-3xl p-8 md:p-10 flex flex-col justify-center border border-white/5 bg-[#070708] relative overflow-hidden transition-all duration-500 group-hover:border-white/10 group-hover:bg-[#0a0a0b]">
+        
+        {/* Grainy Texture */}
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
+        <p className="text-gray-400 text-lg leading-relaxed mb-8 relative z-10 font-light group-hover:text-gray-300 transition-colors duration-500">
+          {item.description}
         </p>
-        <ul className="list-disc pl-5 text-gray-400 text-sm space-y-1">
-          {item.description.map((desc, i) => (
-            <li key={i}>{desc}</li>
+        
+        <div className="flex flex-wrap gap-3 relative z-10">
+          {item.tech.map((t, i) => (
+            <motion.span 
+              key={i} 
+              whileHover={{ y: -2, backgroundColor: "rgba(255,255,255,0.1)" }}
+              className="text-[10px] text-white/40 bg-white/5 border border-white/5 px-4 py-2 rounded-full uppercase tracking-tighter font-semibold transition-all hover:text-white"
+            >
+              {t}
+            </motion.span>
           ))}
-        </ul>
-      </motion.div>
-    </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
-export default function WorkTimeline() {
+export default function WorkExperienceSection() {
+  const internshipData = [
+    { 
+      role: "Full-Stack Intern", 
+      company: "Vedsar Pvt.ltd", 
+      period: "6/2024 - 8/2024", 
+      description: "Spearheaded the development of a high-traffic e-commerce dashboard, improving data rendering speeds by 40%. Implemented secure RESTful APIs using Node.js.", 
+      tech: ["React", "Node.js", "MongoDB", "Express js","Htlm" ,"Css", "Tailwind Css"] 
+    },
+    { 
+      role: "AI/ML Intern", 
+      company: "Edunet Foundation", 
+      period: "6/25 — 8/25", 
+      description: "Completed AI/ML Internship at Edunet Foundation, gained hands-on experience in Python, data preprocessing, machine learning model development, and delivered a real-world AI project with completion certificate", 
+      tech: ["Python,", "NumPy", "Pandas", "Matplotlib", "Scikit-learn","data preprocessing"] 
+    },
+    { 
+      "role": "AI/ML Intern",
+  "company": "Infosys Springboard",
+  "period": "2025 — 2025",
+  "description": "Developed an AI-powered Audio Book Generator that converts text content into natural-sounding speech, leveraging NLP and TTS techniques to enhance accessibility and user experience.",
+  "tech": ["Python", "Text-to-Speech (TTS)", "Natural Language Processing (NLP)", "PyTorch", "Streamlit"]
+    }
+  ];
+
   return (
-    <section
-      id="experience"
-      className="relative bg-black py-24 px-6 sm:px-12 overflow-hidden"
-    >
-      {/* Title */}
-      <div className="text-center mb-24 relative z-10">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl sm:text-5xl font-extrabold text-[#3B82F6] tracking-wide mb-4 relative inline-block"
-        >
-          Work Experience
-          {/* Stylish Underline */}
-          <span className="block w-28 h-[3px] bg-[#3B82F6] mx-auto mt-3 rounded-full shadow-[0_0_10px_#3B82F6]" />
-        </motion.h2>
+    <section className="bg-[#020617] py-32 px-6 md:px-20 w-full overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="relative">
+            <motion.span 
+              initial={{ width: 0 }}
+              whileInView={{ width: "100px" }}
+              className="absolute -top-4 left-0 h-[2px] bg-blue-500"
+            />
+            <h2 className="text-white text-5xl md:text-7xl font-bold tracking-tighter m-0">
+              Experience
+            </h2>
+            <p className="text-gray-500 text-xl mt-4 max-w-md font-light">
+              Building digital products that blend <span className="text-white/80 italic">aesthetics</span> with performance.
+            </p>
+          </div>
+        </header>
 
-        <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto mt-2">
-          A look at my professional journey and hands-on learning experiences.
-        </p>
-      </div>
-
-      {/* Timeline Line — added more gap below heading */}
-      <div className="absolute left-1/2 top-[290px] bottom-[100px] w-[2px] bg-gray-700 transform -translate-x-1/2 z-0"></div>
-
-      {/* Timeline Cards */}
-      <div className="flex flex-col space-y-20 relative z-10">
-        {workItems.map((item, index) => (
-          <TimelineCard key={index} item={item} index={index} />
-        ))}
+        <div className="flex flex-col">
+          {internshipData.map((item, index) => (
+            <ExperienceCard key={index} item={item} index={index} />
+          ))}
+        </div>
       </div>
     </section>
   );
