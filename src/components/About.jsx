@@ -63,7 +63,7 @@ const ProfessionalAbout = () => {
               </p>
 
               <p className="text-lg leading-relaxed font-light text-zinc-400">
-                Beyond traditional development, I am deeply invested in Machine Learning, where I engineer predictive models with proven accuracies—such as my **84.6% accuracy** classification for water quality and 78.4% for EV demand forecasting. I am committed to pushing the boundaries of what's possible with code.
+                Beyond traditional development, I am deeply invested in Machine Learning, where I engineer predictive models with proven accuracies—such as my 84.6% accuracy classification for water quality and 78.4% for EV demand forecasting. I am committed to pushing the boundaries of what's possible with code.
               </p>
             </div>
 
